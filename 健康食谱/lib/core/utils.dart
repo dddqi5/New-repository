@@ -1,23 +1,29 @@
-import 'package:intl/intl.dart';
-
-/// 日期与数字工具
+/// 日期与数字工具。
+/// 注意：这里**不使用 intl 的语言包**，全部手动格式化，
+/// 避免未初始化中文语言数据时 DateFormat 抛异常导致页面崩溃。
 class AppDate {
-  static final DateFormat _day = DateFormat('yyyy-MM-dd');
-  static final DateFormat _display = DateFormat('yyyy年M月d日 EEEE', 'zh');
+  static const _weekdays = ['一', '二', '三', '四', '五', '六', '日'];
 
-  static String toKey(DateTime d) => _day.format(DateTime(d.year, d.month, d.day));
+  static String toKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
 
   static String todayKey() => toKey(DateTime.now());
 
-  static String display(DateTime d) => _display.format(d);
+  static String display(DateTime d) {
+    final w = _weekdays[d.weekday - 1];
+    return '${d.year}年${d.month}月${d.day}日 星期$w';
+  }
 
   static String displayKey(String key) {
     final parsed = DateTime.tryParse(key);
     if (parsed == null) return key;
-    return _display.format(parsed);
+    return display(parsed);
   }
 
-  static DateTime parseKey(String key) => DateTime.tryParse(key) ?? DateTime.now();
+  static DateTime parseKey(String key) =>
+      DateTime.tryParse(key) ?? DateTime.now();
 
   static bool isSameDay(String key, DateTime d) => key == toKey(d);
 }
